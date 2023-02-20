@@ -1,8 +1,19 @@
-from django.urls import path
+from django.urls import path, include
 
 from recipes import views
 
+from rest_framework.routers import SimpleRouter
+
 app_name = 'recipes'
+
+recipe_api_v2_router = SimpleRouter()
+
+recipe_api_v2_router.register(
+    '',
+    views.RecipeAPIV2ViewSet,
+    basename='recipe-api'
+)
+
 
 urlpatterns = [
     path(
@@ -46,25 +57,12 @@ urlpatterns = [
         name='theory',
     ),
     path(
-        'recipes/api/v2/',
-        views.RecipeAPIV2ViewSet.as_view({
-            'get': 'list',
-            'post': 'update'
-        }),
-        name='recipes_api_v2',
-    ),
-    path(
-        'recipes/api/v2/<int:pk>/',
-        views.RecipeAPIV2ViewSet.as_view({
-            'get': 'retrieve',
-            'patch': 'partial_update',
-            'delete': 'destroy'
-        }),
-        name='recipes_api_v2_detail',
-    ),
-    path(
         'recipes/api/v2/tag/<int:pk>/',
         views.tag_api_detail,
         name='recipes_api_v2_tag',
+    ),
+    path(
+        'recipes/api/v2/',
+        include(recipe_api_v2_router.urls)
     ),
 ]
