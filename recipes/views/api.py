@@ -16,9 +16,22 @@ class RecipeAPIV2Pagination(PageNumberPagination):
 
 
 class RecipeAPIV2ViewSet(ModelViewSet):
-    queryset = Recipe.objects.get_published()
     serializer_class = RecipeSerializer
     pagination_class = RecipeAPIV2Pagination
+
+    def get_queryset(self):
+        qs = Recipe.objects.get_published()
+        category_id = self.request.query_params.get('category_id', '')
+
+        if category_id != '' and category_id.is_numeric():
+            qs = qs.filter(category_id=category_id)
+
+        return qs
+
+    def list(self, request, *args, **kwargs):
+        if self.get_queryset().exists() is False:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return super().list(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
         obj = self.get_queryset().filter(pk=kwargs.get('pk')).first()
