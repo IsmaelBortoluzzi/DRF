@@ -26,6 +26,19 @@ class RecipeAPIV2Detail(RetrieveUpdateDestroyAPIView):
     serializer_class = RecipeSerializer
     pagination_class = RecipeAPIV2Pagination
 
+    def partial_update(self, request, *args, **kwargs):
+        obj = self.get_queryset().filter(pk=kwargs.get('pk')).first()
+        serializer = RecipeSerializer(
+            instance=obj,
+            data=request.data,
+            many=False,
+            context={'request': request},
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
 
 @api_view()
 def tag_api_detail(request, pk):
